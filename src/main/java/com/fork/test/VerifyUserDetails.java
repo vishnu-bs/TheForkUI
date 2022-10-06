@@ -1,63 +1,40 @@
 package com.fork.test;
 
+import com.fork.commonFn.BaseTest;
 import com.fork.pages.CaptchaPage;
 import com.fork.pages.HomePage;
 import com.fork.pages.LoginMenuPage;
 import com.fork.pages.UserProfilePage;
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.By;
+import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 
-import java.time.Duration;
+public class VerifyUserDetails extends BaseTest {
 
-public class VerifyUserDetails {
-    public static void main(String[] args) {
+    @Test
+    public void verifyUserDetails() {
+        //Initialisation
+        WebDriver driver = setupTest();
+        CaptchaPage captchaPage = new CaptchaPage(driver);
+        HomePage homePage = new HomePage(driver);
+        LoginMenuPage loginMenuPage = new LoginMenuPage(driver);
+        UserProfilePage userProfilePage = new UserProfilePage(driver);
 
-        @Test
-        public void openApp(){
-
-        }
-        WebDriverManager.chromedriver().setup();
-        WebDriver driver=new ChromeDriver();
-        driver.get("https://www.thefork.fr/");
-        driver.manage().window().maximize();
-        CaptchaPage captchaPage=new CaptchaPage(driver);
-        HomePage homePage=new HomePage(driver);
-        LoginMenuPage loginMenuPage=new LoginMenuPage(driver);
-        UserProfilePage userProfilePage=new UserProfilePage(driver);
-
-        captchaPage.clickCaptcha();
+        //Test
+        //captchaPage.clickCaptcha(); //Please add break point in line no 23 and complete the captcha and resume the test.
         homePage.acceptCookie();
-        loginMenuPage.userLogin("v4uvishnubs@gmail.com","Fork@123");
+        homePage.clickUserMenu();
+        loginMenuPage.userLogin(getDataFromProperty("UserName"), getDataFromProperty("Password"));
         loginMenuPage.verifyLogin();
-
-
-
-
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-       // WebDriverWait webDriverWait = new WebDriverWait(driver,Duration.ofSeconds(10));
-        WebElement iFrameName1 = driver.findElement(By.xpath("//iframe"));
-       //webDriverWait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(iFrameName1));
-        driver.switchTo().frame(iFrameName1);
-        WebElement iFrameName2 = driver.findElement(By.xpath("//iframe[@title='reCAPTCHA']"));
-        driver.switchTo().frame(iFrameName2);
-       //webDriverWait.until(ExpectedConditions.elementToBeClickable(iFrameName2));
-        WebElement radioBox=driver.findElement(By.xpath("//span[@id='recaptcha-anchor']"));
-        radioBox.click();
-
-      //  driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.findElement(By.xpath("//button[@id='_evidon-accept-button']")).click();
-        driver.findElement(By.xpath("//button[@data-testid='user-space']")).click();
-        driver.findElement(By.id("identification_email")).sendKeys("v4uvishnubs@gmail.com");
-        driver.findElement(By.xpath("//button[@data-testid='checkout-submit-email']")).click();
-        driver.findElement(By.id("password")).sendKeys("Fork@123");
-        driver.findElement(By.xpath("//button[@data-testid='submit-password']")).click();
-        driver.findElement(By.xpath("//button[contains(text(),'Mes informations personnelles')]")).click();
-
-
-
-
+        loginMenuPage.clickOnPersonalInfo();
+        userProfilePage.verifyUserDetails("FIRSTNAME", getDataFromProperty("FirstName"));
+        userProfilePage.verifyUserDetails("LASTNAME", getDataFromProperty("LastName"));
+        userProfilePage.verifyUserDetails("PHONE", getDataFromProperty("PhoneNumber"));
+        userProfilePage.verifyUserDetails("EMAIL", getDataFromProperty("emailID"));
+        userProfilePage.verifyUserDetails("COUNTRY-CODE", getDataFromProperty("CountryCode"));
+        userProfilePage.verifyUserDetails("DOB", getDataFromProperty("DOB"));
+        userProfilePage.verifyGender(getDataFromProperty("Gender"));
+        loginMenuPage.logoutUser();
+        homePage.verifyLogOut();
+        tearDown(driver);
     }
 }
